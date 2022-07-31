@@ -2,27 +2,26 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class Movement : MonoBehaviour
+public abstract class Movement : MonoBehaviour
 {
+    private const int HitBufferSize = 16;
+    private const float MinMoveDistance = 0.01f;
+    private const float ShellRadius = 0.01f;
+
     private Rigidbody2D _rigidbody;
-
-    [SerializeField] private float _horizontalMovementVelocity = 2;
-    [SerializeField] private float _jumpVelocity = 15;
-    [SerializeField, Range(8, 32)] private const int _hitBufferSize = 16;
-    [SerializeField] private const float _minMoveDistance = 0.01f;
-    [SerializeField] private const float _shellRadius = 0.01f;
-
-    [SerializeField] private LayerMask _layerMask;
-    [SerializeField] private float _gravityModifier = 1f;
-    [SerializeField] private float _minGroundNormalY = 0.5f;
-
     private bool _isGrounded;
     private ContactFilter2D _contactFilter2D;
-    private RaycastHit2D[] _hitBuffer = new RaycastHit2D[_hitBufferSize];
-    private List<RaycastHit2D> _hitList = new List<RaycastHit2D>(_hitBufferSize);
-    private Vector2 _targetVelocity;
+    private readonly RaycastHit2D[] _hitBuffer = new RaycastHit2D[HitBufferSize];
+    private readonly List<RaycastHit2D> _hitList = new (HitBufferSize);
+    protected Vector2 _targetVelocity;
     private Vector2 _groundNormal;
     private Vector2 _velocity;
+
+    [SerializeField] protected float _horizontalMovementVelocity = 5;
+    [SerializeField] protected float _jumpVelocity = 15;
+    [SerializeField] protected LayerMask _layerMask;
+    [SerializeField] protected float _gravityModifier = 2f;
+    [SerializeField] protected float _minGroundNormalY = 0.5f;
 
     public bool IsGrounded => _isGrounded;
     public Vector2 Velocity => _velocity;
@@ -35,16 +34,36 @@ public class Movement : MonoBehaviour
         _contactFilter2D.useLayerMask = true;
     }
 
-    private void Update()
+    protected virtual void Update()
     {
-        _targetVelocity = new Vector2(Input.GetAxis("Horizontal"), 0);
-
-        Jump();
+        ChooseDirection();
+    }
+    protected virtual void FixedUpdate()
+    {
+        Move();
     }
 
-    private void FixedUpdate()
+    protected void SetDirection(Vector2 horizontalDirection, bool isJumping)
     {
-        _velocity += _gravityModifier * Physics2D.gravity * Time.deltaTime;
+        _targetVelocity = horizontalDirection;
+
+        Jump(isJumping);
+    }
+
+    protected void Jump(bool isJumping)
+    {
+        if (isJumping)
+        {
+            if (_isGrounded)
+            {
+                _velocity.y = _jumpVelocity;
+            }
+        } 
+    }
+
+    protected virtual void Move ()
+    {
+        _velocity += _gravityModifier * Time.deltaTime * Physics2D.gravity;
         _velocity.x = _targetVelocity.x * _horizontalMovementVelocity;
 
         _isGrounded = false;
@@ -53,33 +72,21 @@ public class Movement : MonoBehaviour
         Vector2 movementAlongGround = new Vector2(_groundNormal.y, -_groundNormal.x);
         Vector2 movement = movementAlongGround * deltaPosition.x;
 
-        Move(movement, false);
+        MoveByDirection(movement, false);
 
         movement = Vector2.up * deltaPosition.y;
 
-        Move(movement, true);
-
+        MoveByDirection(movement, true);
     }
 
-    private void Jump ()
-    {
-        if (Input.GetKey(KeyCode.W))
-        {
-            if (_isGrounded)
-            {
-                _velocity.y = _jumpVelocity;
-            }
-        }
-    }
-
-    private void Move (Vector2 movement, bool yMovement)
+    protected void MoveByDirection(Vector2 movement, bool yMovement)
     {
         float distance = movement.magnitude;
 
-        if (distance > _minMoveDistance)
+        if (distance > MinMoveDistance)
         {
 
-            int count = _rigidbody.Cast(movement, _contactFilter2D, _hitBuffer, distance + _shellRadius);
+            int count = _rigidbody.Cast(movement, _contactFilter2D, _hitBuffer, distance + ShellRadius);
 
             _hitList.Clear();
 
@@ -109,11 +116,13 @@ public class Movement : MonoBehaviour
                     _velocity = _velocity - projection * currentNormal;
                 }
 
-                float modifiedDistance = _hitList[i].distance - _shellRadius;
+                float modifiedDistance = _hitList[i].distance - ShellRadius;
                 distance = modifiedDistance < distance ? modifiedDistance : distance;
             }
         }
 
         _rigidbody.position = _rigidbody.position + movement.normalized * distance;
     }
+
+    protected abstract void ChooseDirection();
 }
