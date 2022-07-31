@@ -7,9 +7,18 @@ public class EnemyMovement : Movement
     [SerializeField] private List<Transform> _waypoints;
     [SerializeField, Range(0,1f)] private float _waypointPadding = 0.2f;
 
-    private int _currentWaypoint;
+    private int _currentWaypoint = 0;
 
     public Vector2 CurrentPosition => transform.position;
+
+    private void OnValidate()
+    {
+        if (_waypoints.Count < 1)
+        {
+            _waypoints = new List<Transform>();
+            _waypoints.Add(gameObject.transform);
+        }
+    }
 
     protected override void Update()
     {
