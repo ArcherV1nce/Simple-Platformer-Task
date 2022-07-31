@@ -2,17 +2,7 @@ using UnityEngine;
 
 public class PlayerMovement : Movement
 {
-    protected override void Update()
-    {
-        base.Update();
-    }
-
-    protected override void FixedUpdate()
-    {
-        base.FixedUpdate();
-    }
-
-    protected override void ChooseDirection()
+ protected override void ChooseDirection()
     {
         bool isJumping = false;
 

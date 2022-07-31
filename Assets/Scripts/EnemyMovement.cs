@@ -25,11 +25,6 @@ public class EnemyMovement : Movement
         ChooseWaypoint();
         base.Update();
     }
-
-    protected override void FixedUpdate()
-    {
-        base.FixedUpdate();
-    }
     
     private void ChooseWaypoint()
     {
