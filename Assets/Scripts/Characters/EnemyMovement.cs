@@ -66,8 +66,10 @@ public class EnemyMovement : Movement
     {
         if (_waypoints.Count < 1)
         {
-            _waypoints = new List<Transform>();
-            _waypoints.Add(gameObject.transform);
+            _waypoints = new List<Transform>
+            {
+                gameObject.transform
+            };
         }
     }
 

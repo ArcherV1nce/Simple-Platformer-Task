@@ -7,7 +7,6 @@ public class CollectiblesAnimationControl : MonoBehaviour
 
     private Collectible _collectible;
     private Animator _animator;
-    private bool _pickedUp;
 
     private void Awake()
     {

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CoinSpawn : MonoBehaviour
+public class CoinSpawner : MonoBehaviour
 {
     [SerializeField] private Collectible _coin;
     [SerializeField] private Transform _parentObject;

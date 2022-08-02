@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class LevelChange : MonoBehaviour
+public class LevelControl : MonoBehaviour
 {
     [SerializeField] private string _nextScene;
 

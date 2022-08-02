@@ -21,25 +21,17 @@ public class CharacterAnimatorControl : MonoBehaviour
 
     private void FixedUpdate()
     {
-        CheckForMovementHorizontal();
-        CheckForMovementVertical();
+        SetHorizontalMovementParameters();
+        SetVerticalMovementParameters();
     }
 
-    private void CheckForMovementHorizontal()
+    private void SetHorizontalMovementParameters()
     {
         if (Mathf.Abs(_movement.Velocity.x) > 0)
         {
             _isMoving = true;
 
-            if (_movement.Velocity.x < -_minimumFlipVelocity)
-            {
-                _directionLeft = true;
-            }
-            
-            else
-            {
-                _directionLeft = false;
-            }
+            _directionLeft = _movement.Velocity.x < -_minimumFlipVelocity;
         }
 
         else
@@ -50,7 +42,8 @@ public class CharacterAnimatorControl : MonoBehaviour
         _animator.SetBool(RunningParameter, _isMoving);
         _animator.SetBool(MovingLeftParameter, _directionLeft);
     }
-    private void CheckForMovementVertical()
+
+    private void SetVerticalMovementParameters()
     {
         _animator.SetBool(GroundedParameter, _movement.IsGrounded);
     }

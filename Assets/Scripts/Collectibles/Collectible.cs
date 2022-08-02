@@ -30,9 +30,9 @@ public class Collectible : MonoBehaviour
 
     private void InteractWithPlayer(Collider2D collision)
     {
-        if (collision.GetComponent<Player>() && _isPickedUp == false)
+        if (collision.TryGetComponent(out Player player) && _isPickedUp == false)
         {
-            collision.GetComponent<Player>().AddCoins(this);
+            player.AddCoins(this);
             _isPickedUp = true;
             _onPickUp.Invoke();
         }
