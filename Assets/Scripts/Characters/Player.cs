@@ -6,7 +6,7 @@ public class Player : Character
 
     public int Coins => _coins;
 
-    public void AddCoins (Coin coin)
+    public void AddCoins (Collectible coin)
     {
         _coins += coin.Value;
         Debug.Log($"Player has {Coins} coins.");

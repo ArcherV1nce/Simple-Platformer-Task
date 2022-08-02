@@ -13,11 +13,7 @@ public class EnemyMovement : Movement
 
     private void OnValidate()
     {
-        if (_waypoints.Count < 1)
-        {
-            _waypoints = new List<Transform>();
-            _waypoints.Add(gameObject.transform);
-        }
+        ValidateWaypoints();
     }
 
     protected override void Update()
@@ -64,6 +60,15 @@ public class EnemyMovement : Movement
             return -1;
 
         else return 0;
+    }
+
+    private void ValidateWaypoints ()
+    {
+        if (_waypoints.Count < 1)
+        {
+            _waypoints = new List<Transform>();
+            _waypoints.Add(gameObject.transform);
+        }
     }
 
     protected override void ChooseDirection()

@@ -4,40 +4,38 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public abstract class Movement : MonoBehaviour
 {
+    [SerializeField] protected ContactFilter2D _contactFilter2D;
+    [SerializeField] protected LayerMask _layerMask;
+    [SerializeField] protected float _horizontalMovementVelocity = 5;
+    [SerializeField] protected float _jumpVelocity = 15;
+    [SerializeField] protected float _gravityModifier = 2f;
+    [SerializeField] protected float _minGroundNormalY = 0.5f;
+
     private const int HitBufferSize = 16;
     private const float MinMoveDistance = 0.01f;
     private const float ShellRadius = 0.01f;
-
+    
     private Rigidbody2D _rigidbody;
     private bool _isGrounded;
-    private ContactFilter2D _contactFilter2D;
     private readonly RaycastHit2D[] _hitBuffer = new RaycastHit2D[HitBufferSize];
     private readonly List<RaycastHit2D> _hitList = new (HitBufferSize);
     protected Vector2 _targetVelocity;
     private Vector2 _groundNormal;
     private Vector2 _velocity;
 
-    [SerializeField] protected float _horizontalMovementVelocity = 5;
-    [SerializeField] protected float _jumpVelocity = 15;
-    [SerializeField] protected LayerMask _layerMask;
-    [SerializeField] protected float _gravityModifier = 2f;
-    [SerializeField] protected float _minGroundNormalY = 0.5f;
-
     public bool IsGrounded => _isGrounded;
     public Vector2 Velocity => _velocity;
 
     private void OnEnable()
     {
-        _rigidbody = GetComponent<Rigidbody2D>();
-        _contactFilter2D.useTriggers = false;
-        _contactFilter2D.SetLayerMask(_layerMask);
-        _contactFilter2D.useLayerMask = true;
+        SetUp();
     }
 
     protected virtual void Update()
     {
         ChooseDirection();
     }
+
     protected virtual void FixedUpdate()
     {
         Move();
@@ -113,7 +111,7 @@ public abstract class Movement : MonoBehaviour
 
                 if (projection < 0)
                 {
-                    _velocity = _velocity - projection * currentNormal;
+                    _velocity -= projection * currentNormal;
                 }
 
                 float modifiedDistance = _hitList[i].distance - ShellRadius;
@@ -121,7 +119,15 @@ public abstract class Movement : MonoBehaviour
             }
         }
 
-        _rigidbody.position = _rigidbody.position + movement.normalized * distance;
+        _rigidbody.position += movement.normalized * distance;
+    }
+
+    private void SetUp()
+    {
+        _rigidbody = GetComponent<Rigidbody2D>();
+        _contactFilter2D.SetLayerMask(_layerMask);
+        _contactFilter2D.useLayerMask = true;
+        _contactFilter2D.useTriggers = false;
     }
 
     protected abstract void ChooseDirection();
