@@ -24,12 +24,16 @@ public class LevelFinish : MonoBehaviour
         _trigger.isTrigger = true;
     }
 
-    private void TryFinishScene(Collider2D collider)
+    private bool TryFinishScene(Collider2D collider)
     {
+        bool isPlayer = false;
+
         if (collider.TryGetComponent(out Player player))
         {
-            Debug.Log($"{collider.gameObject.name} entered collision.");
+            isPlayer = true;
             _onLevelFinish.Invoke();
         }
+
+        return isPlayer;
     }
 }
