@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
 public abstract class Movement : MonoBehaviour
 {
     [SerializeField] protected ContactFilter2D _contactFilter2D;
@@ -14,11 +14,12 @@ public abstract class Movement : MonoBehaviour
     private const int HitBufferSize = 16;
     private const float MinMoveDistance = 0.01f;
     private const float ShellRadius = 0.01f;
-    
+
     private Rigidbody2D _rigidbody;
+    private Collider2D _collider;
     private bool _isGrounded;
     private readonly RaycastHit2D[] _hitBuffer = new RaycastHit2D[HitBufferSize];
-    private readonly List<RaycastHit2D> _hitList = new (HitBufferSize);
+    private readonly List<RaycastHit2D> _hitList = new(HitBufferSize);
     protected Vector2 _targetVelocity;
     private Vector2 _groundNormal;
     private Vector2 _velocity;
@@ -56,10 +57,10 @@ public abstract class Movement : MonoBehaviour
             {
                 _velocity.y = _jumpVelocity;
             }
-        } 
+        }
     }
 
-    protected virtual void Move ()
+    protected virtual void Move()
     {
         _velocity += _gravityModifier * Time.deltaTime * Physics2D.gravity;
         _velocity.x = _targetVelocity.x * _horizontalMovementVelocity;
@@ -90,7 +91,15 @@ public abstract class Movement : MonoBehaviour
 
             for (int i = 0; i < count; i++)
             {
-                _hitList.Add(_hitBuffer[i]);
+                if (_hitBuffer[i].collider.isTrigger == false)
+                {
+                    if (CheckForPlatform(_hitBuffer[i]))
+                    {
+                        continue;
+                    }
+
+                    _hitList.Add(_hitBuffer[i]);
+                }
             }
 
             for (int i = 0; i < _hitList.Count; i++)
@@ -122,9 +131,24 @@ public abstract class Movement : MonoBehaviour
         _rigidbody.position += movement.normalized * distance;
     }
 
+    private bool CheckForPlatform(RaycastHit2D hit)
+    {
+        if (hit.collider.TryGetComponent(out PlatformEffector2D platform) &&
+                        platform.transform.position.y > transform.position.y - _collider.bounds.size.y)
+        {
+            return true;
+        }
+
+        else
+        {
+            return false;
+        }
+    }
+
     private void SetUp()
     {
         _rigidbody = GetComponent<Rigidbody2D>();
+        _collider = GetComponent<Collider2D>();
         _contactFilter2D.SetLayerMask(_layerMask);
         _contactFilter2D.useLayerMask = true;
         _contactFilter2D.useTriggers = false;
